@@ -9,9 +9,9 @@ addpath([pwd '/utils/'])
 % % % % % % % % % % %  Network design % % % % % % % % % % % %
 model=struct;
 	model.distancemetric = 'cityblock'; % 'cityblock' or 'euclidean'
-	model.numblocks = 16; % num passes through the training set
-	model.numinitials = 10; % Number of initializations to average across
-	model.params = [1  0.1  0.2  4]; %c, assoclearning, attenlearning, phi
+	model.numblocks = 10; % num passes through the training set
+	model.numinitials = 4; % Number of initializations to average across
+	model.params = [4  0.8 1 3.7 4]; % c, responlearning, assoclearning, attenlearning, phi
  
 %   load exemplars
 	load shj
@@ -22,7 +22,7 @@ training =  zeros(model.numblocks,6);
 
 for i=1:6
 	
-% 	set up category assignments.
+% 	Set up category assignments.
 %	Categories are dummycoded, using [-1, +1]
 	model.targets = dummyvar(assignments(:,i)) * 2 - 1;
 	
