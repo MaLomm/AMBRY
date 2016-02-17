@@ -22,13 +22,14 @@ function [result] = ALCOVE(model)
 % unpack input struct
 v2struct(model)
 
-rng('shuffle') %get random seed
+RNG('shuffle') %get random seed
 
 %************* Declaration of Global Variables *************%
 %-----------------------------------------------------------%
 numfeatures		   = size(exemplars,2);
 numcategories	   = size(targets,2);
 numexemplars       = size(exemplars,1);
+numresponses        = size(targets, 2);
 numupdates		   = numexemplars*numblocks;
 
 %-----------------------------------------------------------%
@@ -38,7 +39,12 @@ for modelnumber=1:numinitials
 	
 	%  initialize weight matrices and presentation order
 	attentionweights   = ones(1,numfeatures) .* (1/numfeatures);
-	associationweights = zeros(numexemplars,numcategories);
+	associationweights = zeros(numexemplars,numcategories);   
+    responseweights = zeros(numcategories,numresponses); % intialized such that w^resp_rk = 1 if r=k and w^resp_rk = 0 else
+    for weight=1:numcategories % In case there is a way to do this without a for loop I'm eager to know
+            responseweights(weight, weight) = 1;
+    end
+
 	presentationorder  = shuffletrials(numexemplars, numblocks);
 
 	%  iterate over trials
@@ -50,18 +56,18 @@ for modelnumber=1:numinitials
 		
 		% pass activations through the network
 		%--------------------------------------------------------------
-		[outputactivation, hiddenactivation] = FORWARDPASS(...
+		[responseactivation, categoryactivation, hiddenactivation] = FORWARDPASS(...
 			trialinput,exemplars,distancemetric,attentionweights,...
-			associationweights,params);
+			associationweights, responseweights, params);
 
 		% calculate classification probabilities
-		ps = RESPONSERULE(outputactivation,params(4));
+		ps = RESPONSERULE(responseactivation,params(4));
 		training(trialnumber,modelnumber) = ps(correctcategory);
 
 		% update weights using backprop
 		%--------------------------------------------------------------
-		[attentionweights,associationweights]=BACKPROP(associationweights, ...
-			attentionweights,trialtarget,outputactivation,hiddenactivation, ...
+		[attentionweights,associationweights,responseweights]=BACKPROP(responseweights,associationweights, ...
+			attentionweights,trialtarget,responseactivation,categoryactivation,hiddenactivation, ...
 			exemplars,trialinput,params);
 	end   
 end
@@ -69,4 +75,3 @@ end
 % save items in the result struct
 result=struct;
 result.training=blockrows(mean(training,2),numexemplars);
-		  
