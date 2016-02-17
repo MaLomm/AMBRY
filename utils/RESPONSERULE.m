@@ -1,4 +1,4 @@
-function [ps]=RESPONSERULE(outputactivation,phi)
+function [ps]=RESPONSERULE(responseactivation,phi)
 %--------------------------------------------------------------------------
 % This script simply calculates classification probabilities for a set of
 % alcove's output activations, with a given parameter phi.
@@ -9,6 +9,7 @@ function [ps]=RESPONSERULE(outputactivation,phi)
 % 	phi						response mapping parameter
 %--------------------------------------------------------------------------
 
-numcategories 		= size(outputactivation,2);
-outputactivation 	= exp(outputactivation .* phi);
-ps = bsxfun(@rdivide,outputactivation,sum(outputactivation,2));
+numcategories 		= size(responseactivation,2);
+outputactivation 	= exp(responseactivation .* phi);
+ps = bsxfun(@rdivide,responseactivation,sum(responseactivation,2));
+
